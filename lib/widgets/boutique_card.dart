@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:assujtiapp/model/boutique.dart';
 
-class BoutiqueCard extends StatelessWidget {
+class BoutiqueCard extends StatefulWidget {
   final Boutique boutique;
   final VoidCallback onDelete;
 
@@ -12,79 +12,122 @@ class BoutiqueCard extends StatelessWidget {
   });
 
   @override
+  State<BoutiqueCard> createState() => _BoutiqueCardState();
+}
+
+class _BoutiqueCardState extends State<BoutiqueCard> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    boutique.nom,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green[700],
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: const LinearGradient(
+            colors: [Color(0xFF43CEA2), Color(0xFF185A9D)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black26,
+              blurRadius: _isPressed ? 2 : 8,
+              offset: Offset(0, _isPressed ? 2 : 4),
+            ),
+          ],
+        ),
+        child: Transform.scale(
+          scale: _isPressed ? 0.97 : 1.0,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Material(
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header (Nom + menu)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.boutique.nom,
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Colors.green[800],
+                                ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        PopupMenuButton(
+                          icon: const Icon(Icons.more_vert, color: Colors.grey),
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: ListTile(
+                                leading: Icon(Icons.edit),
+                                title: Text('Modifier'),
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: ListTile(
+                                leading: Icon(Icons.delete, color: Colors.red),
+                                title: Text('Supprimer'),
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'delete') _showDeleteDialog(context);
+                          },
+                        ),
+                      ],
                     ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                PopupMenuButton(
-                  icon: const Icon(Icons.more_vert),
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                      value: 'edit',
-                      child: ListTile(
-                        leading: Icon(Icons.edit),
-                        title: Text('Modifier'),
-                      ),
-                    ),
-                    const PopupMenuItem(
-                      value: 'delete',
-                      child: ListTile(
-                        leading: Icon(Icons.delete, color: Colors.red),
-                        title: Text('Supprimer'),
-                      ),
+                    const Divider(color: Colors.grey, thickness: 1, height: 16),
+
+                    // Infos boutique
+                    _buildInfoRow(Icons.person, widget.boutique.proprietaire, Colors.blue),
+                    _buildInfoRow(Icons.phone, widget.boutique.telephone, Colors.green),
+                    _buildInfoRow(Icons.location_on,
+                        '${widget.boutique.adresse}, ${widget.boutique.quartier}', Colors.red),
+                    _buildInfoRow(Icons.business, widget.boutique.typeCommerce, Colors.orange),
+                    _buildInfoRow(Icons.people,
+                        '${widget.boutique.nombreEmployes} employé(s)', Colors.purple),
+                    _buildInfoRow(
+                      Icons.calendar_today,
+                      'Ouvert le ${widget.boutique.dateOuverture.day}/${widget.boutique.dateOuverture.month}/${widget.boutique.dateOuverture.year}',
+                      Colors.brown,
                     ),
                   ],
-                  onSelected: (value) {
-                    if (value == 'delete') {
-                      _showDeleteDialog(context);
-                    }
-                  },
                 ),
-              ],
+              ),
             ),
-            const SizedBox(height: 8),
-            _buildInfoRow(Icons.person, boutique.proprietaire),
-            _buildInfoRow(Icons.phone, boutique.telephone),
-            _buildInfoRow(Icons.location_on, '${boutique.adresse}, ${boutique.quartier}'),
-            _buildInfoRow(Icons.business, boutique.typeCommerce),
-            _buildInfoRow(Icons.people, '${boutique.nombreEmployes} employé(s)'),
-            _buildInfoRow(Icons.calendar_today, 
-                'Ouvert le ${boutique.dateOuverture.day}/${boutique.dateOuverture.month}/${boutique.dateOuverture.year}'),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(IconData icon, String text, Color iconColor) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Colors.grey),
-          const SizedBox(width: 8),
+          Icon(icon, size: 18, color: iconColor),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14, color: Colors.black87),
             ),
           ),
         ],
@@ -97,7 +140,7 @@ class BoutiqueCard extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la suppression'),
-        content: Text('Voulez-vous vraiment supprimer la boutique "${boutique.nom}" ?'),
+        content: Text('Voulez-vous vraiment supprimer la boutique "${widget.boutique.nom}" ?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -106,7 +149,7 @@ class BoutiqueCard extends StatelessWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              onDelete();
+              widget.onDelete();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Supprimer'),

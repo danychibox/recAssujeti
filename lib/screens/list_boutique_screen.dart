@@ -175,9 +175,16 @@ class _ListBoutiqueScreenState extends State<ListBoutiqueScreen> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                labelText: 'Rechercher...',
+                 hintText: "Rechercher un produit...",
                 prefixIcon: const Icon(Icons.search),
-                border: const OutlineInputBorder(),
+                 filled: true,
+            fillColor: Colors.grey.shade100,
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
